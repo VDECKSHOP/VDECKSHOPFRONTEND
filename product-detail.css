@@ -1,4 +1,5 @@
-/* ? Reset Default Styles */
+@charset "utf-8";
+/* ✅ Reset Default Styles */
 body {
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
@@ -6,7 +7,7 @@ body {
     padding: 0;
 }
 
-/* ? Product Details Container */
+/* ✅ Product Details Container */
 .product-details-container {
     display: flex;
     flex-wrap: wrap;
@@ -19,7 +20,7 @@ body {
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* ? Product Images */
+/* ✅ Product Images */
 .product-images {
     flex: 1;
     display: flex;
@@ -56,7 +57,7 @@ body {
     transform: scale(1.1);
 }
 
-/* ? Product Info */
+/* ✅ Product Info */
 .product-info {
     flex: 1;
     padding: 20px;
@@ -80,7 +81,7 @@ body {
     margin-bottom: 20px;
 }
 
-/* ? Quantity Controls */
+/* ✅ Quantity Controls */
 .quantity-controls {
     display: flex;
     align-items: center;
@@ -114,7 +115,7 @@ body {
     background-color: #8c162b;
 }
 
-/* ? Add to Cart Button */
+/* ✅ Add to Cart Button */
 .add-to-cart-btn {
     background-color: #A91D3A;
     color: white;
@@ -131,7 +132,7 @@ body {
     background-color: #8c162b;
 }
 
-/* ? Product Description */
+/* ✅ Product Description */
 .product-description {
     background: #f9f9f9;
     padding: 15px;
@@ -150,7 +151,7 @@ body {
     line-height: 1.6;
 }
 
-/* ? Responsive Design */
+/* ✅ Responsive Design */
 @media (max-width: 768px) {
     .product-details-container {
         flex-direction: column;
