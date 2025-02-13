@@ -72,7 +72,7 @@ const response = await fetch(`${API_BASE_URL}/api/products/${id}`, { // ✅ Upda
     headers: { "Accept": "application/json" }
 });
 
-            });
+            
 
             if (!response.ok) throw new Error("âŒ Failed to delete product.");
 
