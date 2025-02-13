@@ -3,8 +3,11 @@ document.addEventListener("DOMContentLoaded", loadOrders);
 // ✅ Fetch and display orders
 async function loadOrders() {
     try {
-        let response = await fetch("http://localhost:4000/api/orders");
-        let orders = await response.json();
+       const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
+
+let response = await fetch(`${API_BASE_URL}/api/orders`); // ✅ Updated API URL
+let orders = await response.json();
+
 
         if (!response.ok) throw new Error("❌ Failed to fetch orders.");
 
@@ -25,10 +28,11 @@ async function loadOrders() {
                 <td>${order.address}</td>
                 <td>${formatItems(order.items)}</td>
                 <td>₱${parseFloat(order.total).toFixed(2)}</td>
-                <td>
-                    <img src="http://localhost:4000${order.paymentProof}" width="200" height="200" alt="Payment Proof" 
-                         onerror="this.src='placeholder.jpg'">
-                </td>
+<td>
+    <img src="https://vdeck.onrender.com${order.paymentProof}" width="200" height="200" alt="Payment Proof" 
+         onerror="this.src='placeholder.jpg'">
+</td>
+
                 <td>
                     <button class="delete-btn" data-id="${order._id}">🗑 Delete</button>
                 </td>
@@ -65,9 +69,12 @@ async function deleteOrder(event) {
     if (!confirm("❌ Are you sure you want to delete this order?")) return;
 
     try {
-        let response = await fetch(`http://localhost:4000/api/orders/${orderId}`, {
-            method: "DELETE",
-        });
+        const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
+
+let response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, { // ✅ Updated API URL
+    method: "DELETE",
+});
+
 
         let result = await response.json();
 

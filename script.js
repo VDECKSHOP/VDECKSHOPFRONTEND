@@ -6,7 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
 // ✅ Fetch products from MongoDB and display them
 async function loadProducts() {
     try {
-        const response = await fetch("http://localhost:4000/api/products");
+        const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
+        const response = await fetch(`${API_BASE_URL}/api/products`); // ✅ Updated API URL
+        
         if (!response.ok) {
             throw new Error("❌ Failed to fetch products.");
         }
@@ -18,6 +20,7 @@ async function loadProducts() {
         console.error("❌ Error fetching products:", error);
     }
 }
+
 
 // ✅ Render products dynamically
 function renderProducts(products) {
@@ -36,7 +39,10 @@ function renderProducts(products) {
 
         const productHTML = `
         <div class="product">
-            <img src="http://localhost:4000${product.images?.[0]}" alt="${product.name}" onerror="this.src='placeholder.jpg'">
+           <img src="https://vdeck.onrender.com${product.images?.[0]}" 
+     alt="${product.name}" 
+     onerror="this.src='placeholder.jpg'">
+
 
             <h3>${product.name}</h3>
             <p>₱${product.price.toFixed(2)}</p>
@@ -148,10 +154,13 @@ document.getElementById("order-form").addEventListener("submit", async function 
     formData.append("paymentProof", paymentProof);
 
     try {
-        const response = await fetch("http://localhost:4000/api/orders", {
-            method: "POST",
-            body: formData,
-        });
+        const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
+
+const response = await fetch(`${API_BASE_URL}/api/orders`, { // ✅ Updated API URL
+    method: "POST",
+    body: formData,
+});
+
 
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "❌ Failed to place order.");

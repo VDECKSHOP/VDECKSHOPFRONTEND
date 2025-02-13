@@ -10,7 +10,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     try {
         // ✅ Fetch a single product using its ID
-        const response = await fetch(`http://localhost:4000/api/products/${productId}`);
+       const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
+
+const response = await fetch(`${API_BASE_URL}/api/products/${productId}`); // ✅ Updated API URL
+
 
         if (!response.ok) {
             throw new Error(`❌ API Error: ${response.status} - ${response.statusText}`);
@@ -30,9 +33,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         document.getElementById("product-description").textContent = product.description || "No description available.";
 
         // ✅ Set Main Product Image (Fix: Use Absolute Path)
-        const mainImage = document.getElementById("main-product-image");
-        mainImage.src = `http://localhost:4000${product.images[0]}`; // Fixed path
-        mainImage.onerror = () => (mainImage.src = "placeholder.jpg");
+        const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
+
+const mainImage = document.getElementById("main-product-image");
+mainImage.src = `${API_BASE_URL}${product.images[0]}`; // ✅ Updated API URL
+mainImage.onerror = () => (mainImage.src = "placeholder.jpg");
 
         // ✅ Generate Thumbnails for All Images (Fix: Use Absolute Paths)
         const thumbnailsContainer = document.getElementById("thumbnails");
@@ -40,7 +45,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         product.images.forEach((img, index) => {
             const imgElement = document.createElement("img");
-            imgElement.src = `http://localhost:4000${img}`; // Fixed path
+            const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
+
+imgElement.src = `${API_BASE_URL}${img}`; // ✅ Updated API URL
+
             imgElement.classList.add("thumbnail");
             imgElement.alt = `Thumbnail ${index + 1}`;
             imgElement.onerror = () => (imgElement.src = "placeholder.jpg");
@@ -49,8 +57,11 @@ document.addEventListener("DOMContentLoaded", async function () {
             imgElement.onclick = () => {
                 mainImage.style.opacity = 0;
                 setTimeout(() => {
-                    mainImage.src = `http://localhost:4000${img}`;
-                    mainImage.style.opacity = 1;
+                    const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
+
+mainImage.src = `${API_BASE_URL}${img}`; // ✅ Updated API URL
+mainImage.style.opacity = 1;
+
                 }, 200);
             };
 
