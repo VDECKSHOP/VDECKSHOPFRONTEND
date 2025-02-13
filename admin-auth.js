@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const storedUserId = "admin";
-    const storedPassword = "12345";
+    const storedUserId = "gablyraemerson";
+    const storedPassword = "gablyraemerson";
 
     const loginForm = document.getElementById("login-form");
     if (loginForm) {
