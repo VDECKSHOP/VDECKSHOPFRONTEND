@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", async function () {
+    const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Declare this ONLY ONCE
+
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get("id");
 
@@ -10,10 +12,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     try {
         // ✅ Fetch a single product using its ID
-       const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
-
-const response = await fetch(`${API_BASE_URL}/api/products/${productId}`); // ✅ Updated API URL
-
+        const response = await fetch(`${API_BASE_URL}/api/products/${productId}`);
 
         if (!response.ok) {
             throw new Error(`❌ API Error: ${response.status} - ${response.statusText}`);
@@ -33,11 +32,9 @@ const response = await fetch(`${API_BASE_URL}/api/products/${productId}`); // �
         document.getElementById("product-description").textContent = product.description || "No description available.";
 
         // ✅ Set Main Product Image (Fix: Use Absolute Path)
-        const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
-
-const mainImage = document.getElementById("main-product-image");
-mainImage.src = `${API_BASE_URL}${product.images[0]}`; // ✅ Updated API URL
-mainImage.onerror = () => (mainImage.src = "placeholder.jpg");
+        const mainImage = document.getElementById("main-product-image");
+        mainImage.src = `${API_BASE_URL}${product.images[0]}`;
+        mainImage.onerror = () => (mainImage.src = "placeholder.jpg"); // ✅ This must exist in the project folder
 
         // ✅ Generate Thumbnails for All Images (Fix: Use Absolute Paths)
         const thumbnailsContainer = document.getElementById("thumbnails");
@@ -45,23 +42,17 @@ mainImage.onerror = () => (mainImage.src = "placeholder.jpg");
 
         product.images.forEach((img, index) => {
             const imgElement = document.createElement("img");
-            const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
-
-imgElement.src = `${API_BASE_URL}${img}`; // ✅ Updated API URL
-
+            imgElement.src = `${API_BASE_URL}${img}`;
             imgElement.classList.add("thumbnail");
             imgElement.alt = `Thumbnail ${index + 1}`;
-            imgElement.onerror = () => (imgElement.src = "placeholder.jpg");
+            imgElement.onerror = () => (imgElement.src = "placeholder.jpg"); // ✅ Make sure this image exists
 
             // ✅ Clicking a thumbnail updates the main image with a smooth transition
             imgElement.onclick = () => {
                 mainImage.style.opacity = 0;
                 setTimeout(() => {
-                    const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
-
-mainImage.src = `${API_BASE_URL}${img}`; // ✅ Updated API URL
-mainImage.style.opacity = 1;
-
+                    mainImage.src = `${API_BASE_URL}${img}`;
+                    mainImage.style.opacity = 1;
                 }, 200);
             };
 
@@ -74,7 +65,6 @@ mainImage.style.opacity = 1;
         window.location.href = "index.html";
     }
 });
-
 
 // ✅ Quantity Controls
 function incrementQuantity() {
@@ -116,3 +106,4 @@ function addToCartFromDetails() {
     localStorage.setItem("cart", JSON.stringify(cart));
     alert("✅ Product added to cart!");
 }
+
