@@ -1,4 +1,4 @@
-/* General Page Styling */
+/* ✅ General Page Styling */
 body {
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
@@ -43,7 +43,7 @@ body {
     display: flex;
     gap: 20px;
     padding: 0;
-    margin-left: auto; /* Moves links closer to the left (towards the logo) */
+    margin-left: auto;
     align-items: center;
 }
 
@@ -186,88 +186,6 @@ button {
     opacity: 1;
 }
 
-/* ✅ Cart and Order Form Container */
-.cart-order-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: stretch; /* Ensures equal height for all sections */
-    gap: 20px;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 20px auto;
-}
-
-/* ✅ Cart Section */
-.cart-section {
-    flex: 1;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 400px; /* Ensures the same height */
-}
-
-/* ✅ Order Form */
-.order-form {
-    flex: 1;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 400px; /* Ensures the same height */
-}
-
-.order-form input,
-.order-form textarea {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-.order-form button {
-    width: 100%;
-    background-color: #A91D3A;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.order-form button:hover {
-    background-color: #8c162b;
-}
-
-/* ✅ Middle Image Styling */
-.middle-image {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    min-height: 400px; /* Ensures it matches Cart & Order Form */
-}
-
-.middle-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 10px;
-}
-
 /* ✅ Mobile Responsive */
 @media (max-width: 768px) {
     .cart-order-container {
@@ -280,12 +198,13 @@ button {
     }
 
     .middle-image img {
-        max-height: 250px; /* Smaller image on mobile */
+        max-height: 250px;
     }
 }
+
 /* ✅ Footer Styling */
 .footer {
-    background-color: #A91D3A; /* Blue background */
+    background-color: #A91D3A;
     color: white;
     text-align: center;
     padding: 20px;
@@ -306,5 +225,6 @@ button {
     padding: 10px;
     font-size: 14px;
 }
+
 
 
