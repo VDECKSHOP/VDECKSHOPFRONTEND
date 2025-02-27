@@ -3,15 +3,12 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCart();
 });
 
-// ✅ Fetch products from MongoDB and display them
 async function loadProducts() {
     try {
-        const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
-        const response = await fetch(`${API_BASE_URL}/api/products`); // ✅ Updated API URL
-        
-        if (!response.ok) {
-            throw new Error("❌ Failed to fetch products.");
-        }
+        const API_BASE_URL = "https://backend-px8c.onrender.com";
+        const response = await fetch(`${API_BASE_URL}/api/products`);
+
+        if (!response.ok) throw new Error("❌ Failed to fetch products.");
 
         const products = await response.json();
         console.log("📦 Products from DB:", products);
@@ -21,29 +18,27 @@ async function loadProducts() {
     }
 }
 
-
-// ✅ Render products dynamically
 function renderProducts(products) {
-    const playingCardsContainer = document.getElementById("playing-cards");
-    const pokerChipsContainer = document.getElementById("poker-chips");
-    const accessoriesContainer = document.getElementById("accessories");
+    const containers = {
+        "playing-cards": document.getElementById("playing-cards"),
+        "poker-chips": document.getElementById("poker-chips"),
+        "accessories": document.getElementById("accessories")
+    };
 
-    if (!playingCardsContainer || !pokerChipsContainer || !accessoriesContainer) return;
+    if (!containers["playing-cards"] || !containers["poker-chips"] || !containers["accessories"]) {
+        console.error("❌ Product containers not found!");
+        return;
+    }
 
-    playingCardsContainer.innerHTML = "";
-    pokerChipsContainer.innerHTML = "";
-    accessoriesContainer.innerHTML = "";
+    Object.values(containers).forEach(container => container.innerHTML = "");
 
     products.forEach((product) => {
-        const category = product.category ? product.category.toLowerCase() : "";
+        const category = product.category ? product.category.toLowerCase() : "accessories";
+        const imageUrl = product.images?.[0] || "placeholder.jpg";
 
         const productHTML = `
         <div class="product">
-           <img src="https://vdeck.onrender.com${product.images?.[0]}" 
-     alt="${product.name}" 
-     onerror="this.src='placeholder.jpg'">
-
-
+            <img src="${imageUrl}" alt="${product.name}" onerror="this.src='placeholder.jpg'">
             <h3>${product.name}</h3>
             <p>₱${product.price.toFixed(2)}</p>
             <div class="button-container">
@@ -52,18 +47,21 @@ function renderProducts(products) {
             </div>
         </div>`;
 
-        if (category === "playing-cards") {
-            playingCardsContainer.insertAdjacentHTML("beforeend", productHTML);
-        } else if (category === "poker-chips") {
-            pokerChipsContainer.insertAdjacentHTML("beforeend", productHTML);
-        } else if (category === "accessories") {
-            accessoriesContainer.insertAdjacentHTML("beforeend", productHTML);
+        if (containers[category]) {
+            containers[category].insertAdjacentHTML("beforeend", productHTML);
+        } else {
+            console.warn(`⚠️ Unrecognized category: "${category}". Adding to 'accessories' by default.`);
+            containers["accessories"].insertAdjacentHTML("beforeend", productHTML);
         }
     });
 }
 
-// ✅ Add to Cart Function
 window.addToCart = (id, name, price) => {
+    if (!id || !name || isNaN(price)) {
+        console.error("❌ Invalid product data:", { id, name, price });
+        return;
+    }
+
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
     const existingProduct = cart.find(item => item.id === id);
 
@@ -78,7 +76,6 @@ window.addToCart = (id, name, price) => {
     renderCart();
 };
 
-// ✅ Render Cart Function (Updates Order Form)
 function renderCart() {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     const cartItemsContainer = document.getElementById("cart-items");
@@ -109,12 +106,10 @@ function renderCart() {
 
     cartTotalSpan.textContent = total.toFixed(2);
     cartCountSpan.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-
     selectedProductTextArea.value = orderSummaryText.trim();
     orderTotalInput.value = total.toFixed(2);
 }
 
-// ✅ Remove Item from Cart (Fix applied)
 window.removeFromCart = (index) => {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
@@ -126,17 +121,15 @@ window.removeFromCart = (index) => {
     }
 };
 
-// ✅ Handle Order Submission (Fix: Prevent Redirection & Fix JSON Format)
-document.getElementById("order-form").addEventListener("submit", async function (e) {
+document.getElementById("order-form")?.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const fullname = document.getElementById("fullname").value.trim();
-    const gcash = document.getElementById("gcash").value.trim();
-    const address = document.getElementById("address").value.trim();
-    const orderTotal = document.getElementById("order-total").value;
-    const paymentProof = document.getElementById("payment-proof").files[0];
+    const fullname = document.getElementById("fullname")?.value.trim();
+    const gcash = document.getElementById("gcash")?.value.trim();
+    const address = document.getElementById("address")?.value.trim();
+    const orderTotal = document.getElementById("order-total")?.value;
+    const paymentProof = document.getElementById("payment-proof")?.files[0];
 
-    // ✅ Fix: Convert "selected-product" text to a JSON array
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
     if (!fullname || !gcash || !address || cart.length === 0 || !orderTotal || !paymentProof) {
@@ -144,54 +137,42 @@ document.getElementById("order-form").addEventListener("submit", async function 
         return;
     }
 
-    // ✅ Convert cart items to JSON string before sending
+    const submitButton = document.getElementById("submit-order");
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Processing...";
+    }
+
     const formData = new FormData();
     formData.append("fullname", fullname);
     formData.append("gcash", gcash);
     formData.append("address", address);
-    formData.append("items", JSON.stringify(cart)); // ✅ Send JSON array
-    formData.append("total", orderTotal);
+    formData.append("items", JSON.stringify(cart));
+    formData.append("total", parseFloat(orderTotal).toFixed(2));
     formData.append("paymentProof", paymentProof);
 
     try {
-        const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
-
-const response = await fetch(`${API_BASE_URL}/api/orders`, { // ✅ Updated API URL
-    method: "POST",
-    body: formData,
-});
-
+        const API_BASE_URL = "https://backend-px8c.onrender.com";
+        const response = await fetch(`${API_BASE_URL}/api/orders`, {
+            method: "POST",
+            body: formData,
+        });
 
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "❌ Failed to place order.");
 
         alert("✅ Order placed successfully!");
-        localStorage.removeItem("cart"); // ✅ Clear cart after order
+        localStorage.removeItem("cart");
         renderCart();
-        document.getElementById("order-form").reset(); // ✅ Reset form without redirecting
+        document.getElementById("order-form")?.reset();
     } catch (error) {
         console.error("❌ Order Submission Error:", error);
-        alert("❌ Failed to place order.");
+        alert(error.message);
+    } finally {
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = "Place Order";
+        }
     }
 });
 
-// ✅ Smooth Scrolling for Product Slider
-document.addEventListener("DOMContentLoaded", () => {
-    const sliders = document.querySelectorAll(".slider-container");
-
-    sliders.forEach(slider => {
-        const wrapper = slider.querySelector(".slider-wrapper");
-        const prevBtn = slider.querySelector(".prev-btn");
-        const nextBtn = slider.querySelector(".next-btn");
-
-        if (!wrapper || !prevBtn || !nextBtn) return;
-
-        prevBtn.addEventListener("click", () => {
-            wrapper.scrollBy({ left: -300, behavior: "smooth" });
-        });
-
-        nextBtn.addEventListener("click", () => {
-            wrapper.scrollBy({ left: 300, behavior: "smooth" });
-        });
-    });
-});

@@ -1,15 +1,15 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-// ✅ Define Product Schema (with timestamps)
 const productSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    price: { type: Number, required: true },
-    category: { type: String, required: true },
-    description: { type: String, default: "" },
-    images: [String], // ✅ Supports multiple images
-}, { timestamps: true }); // ✅ Adds createdAt & updatedAt automatically
+  name: String,
+  price: Number,
+  category: String,
+  description: String,
+  images: [String],
+});
 
-// ✅ Prevent OverwriteModelError
-const Product = mongoose.models.Product || mongoose.model("Product", productSchema);
+const Product = mongoose.model("Product", productSchema);
 
-module.exports = Product;
+export default Product;
+
+

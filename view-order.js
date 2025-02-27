@@ -3,11 +3,9 @@ document.addEventListener("DOMContentLoaded", loadOrders);
 // ✅ Fetch and display orders
 async function loadOrders() {
     try {
-       const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
-
-let response = await fetch(`${API_BASE_URL}/api/orders`); // ✅ Updated API URL
-let orders = await response.json();
-
+        const API_BASE_URL = "https://backend-px8c.onrender.com"; // ✅ Use Render backend
+        let response = await fetch(`${API_BASE_URL}/api/orders`);
+        let orders = await response.json();
 
         if (!response.ok) throw new Error("❌ Failed to fetch orders.");
 
@@ -23,16 +21,15 @@ let orders = await response.json();
             let row = document.createElement("tr");
 
             row.innerHTML = `
-                <td>${order.fullname}</td>
-                <td>${order.gcash}</td>
-                <td>${order.address}</td>
+                <td>${order.fullname || "Unknown"}</td>
+                <td>${order.gcash || "N/A"}</td>
+                <td>${order.address || "No address provided"}</td>
                 <td>${formatItems(order.items)}</td>
-                <td>₱${parseFloat(order.total).toFixed(2)}</td>
-<td>
-    <img src="https://vdeck.onrender.com${order.paymentProof}" width="200" height="200" alt="Payment Proof" 
-         onerror="this.src='placeholder.jpg'">
-</td>
-
+                <td>₱${parseFloat(order.total || 0).toFixed(2)}</td>
+                <td>
+                    <img src="${order.paymentProof || 'placeholder.jpg'}" width="200" height="200" 
+                         alt="Payment Proof" onerror="this.src='placeholder.jpg'">
+                </td>
                 <td>
                     <button class="delete-btn" data-id="${order._id}">🗑 Delete</button>
                 </td>
@@ -45,10 +42,9 @@ let orders = await response.json();
         document.querySelectorAll(".delete-btn").forEach(button => {
             button.addEventListener("click", deleteOrder);
         });
-
     } catch (error) {
         console.error("❌ Error fetching orders:", error);
-        document.getElementById("order-list").innerHTML = `<tr><td colspan='7'>❌ Server error. Try again later.</td></tr>`;
+        document.getElementById("order-list").innerHTML = "<tr><td colspan='7'>❌ Server error. Try again later.</td></tr>";
     }
 }
 
@@ -66,18 +62,15 @@ function formatItems(items) {
 // ✅ Delete an order
 async function deleteOrder(event) {
     const orderId = event.target.dataset.id;
-    if (!confirm("❌ Are you sure you want to delete this order?")) return;
+    if (!confirm("⚠️ Are you sure you want to delete this order? This action cannot be undone.")) return;
 
     try {
-        const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Use Render backend
-
-let response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, { // ✅ Updated API URL
-    method: "DELETE",
-});
-
+        const API_BASE_URL = "https://backend-px8c.onrender.com";
+        let response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
+            method: "DELETE",
+        });
 
         let result = await response.json();
-
         if (!response.ok) throw new Error(result.error || "❌ Failed to delete order.");
 
         alert("✅ Order deleted successfully!");

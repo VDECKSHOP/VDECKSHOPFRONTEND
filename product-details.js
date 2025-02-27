@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", async function () {
-    const API_BASE_URL = "https://vdeck.onrender.com"; // ✅ Declare this ONLY ONCE
+    const API_BASE_URL = "https://backend-px8c.onrender.com"; // ✅ Declare this ONLY ONCE
 
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get("id");
@@ -33,7 +33,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         // ✅ Set Main Product Image (Fix: Use Absolute Path)
         const mainImage = document.getElementById("main-product-image");
-        mainImage.src = `${API_BASE_URL}${product.images[0]}`;
+        const mainImageUrl = product.images[0]?.url || product.images[0];
+        mainImage.src = mainImageUrl.startsWith("http") ? mainImageUrl : `${API_BASE_URL}${mainImageUrl}`;
         mainImage.onerror = () => (mainImage.src = "placeholder.jpg"); // ✅ This must exist in the project folder
 
         // ✅ Generate Thumbnails for All Images (Fix: Use Absolute Paths)
@@ -41,8 +42,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         thumbnailsContainer.innerHTML = "";
 
         product.images.forEach((img, index) => {
+            const imgUrl = img.url || img;
             const imgElement = document.createElement("img");
-            imgElement.src = `${API_BASE_URL}${img}`;
+            imgElement.src = imgUrl.startsWith("http") ? imgUrl : `${API_BASE_URL}${imgUrl}`;
             imgElement.classList.add("thumbnail");
             imgElement.alt = `Thumbnail ${index + 1}`;
             imgElement.onerror = () => (imgElement.src = "placeholder.jpg"); // ✅ Make sure this image exists
@@ -51,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             imgElement.onclick = () => {
                 mainImage.style.opacity = 0;
                 setTimeout(() => {
-                    mainImage.src = `${API_BASE_URL}${img}`;
+                    mainImage.src = imgUrl.startsWith("http") ? imgUrl : `${API_BASE_URL}${imgUrl}`;
                     mainImage.style.opacity = 1;
                 }, 200);
             };
@@ -96,6 +98,7 @@ function addToCartFromDetails() {
         existingProduct.quantity += quantity;
     } else {
         cart.push({
+
             id: productId,
             name: document.getElementById("product-name").textContent,
             price: parseFloat(document.getElementById("product-price").textContent.replace("₱", "")),
