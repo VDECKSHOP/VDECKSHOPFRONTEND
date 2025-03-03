@@ -25,35 +25,41 @@ function renderProducts(products) {
         "accessories": document.getElementById("accessories")
     };
 
+    // Ensure all category containers exist
     if (!containers["playing-cards"] || !containers["poker-chips"] || !containers["accessories"]) {
         console.error("❌ Product containers not found!");
         return;
     }
 
+    // Clear all containers before inserting new products
     Object.values(containers).forEach(container => container.innerHTML = "");
 
     products.forEach((product) => {
-        const category = product.category ? product.category.toLowerCase() : "accessories";
+        const category = product.category?.toLowerCase() || "accessories"; // Default to 'accessories'
         const imageUrl = product.images?.[0] || "placeholder.jpg";
 
-        const productHTML = `
-        <div class="product">
-            <img src="${imageUrl}" alt="${product.name}" onerror="this.src='placeholder.jpg'">
+        if (!containers[category]) {
+            console.warn(`⚠️ Unknown category: ${category}, placing in 'accessories'.`);
+        }
+
+        const targetContainer = containers[category] || containers["accessories"]; // Fallback to accessories
+
+const productHTML = `
+    <div class="product-card">
+     <img src="${imageUrl}" alt="${product.name}" onerror="this.src='placeholder.jpg'"
+                 onclick="goToProductDetails('${product._id}', '${product.name}', ${product.price}, '${imageUrl}')">
             <h3>${product.name}</h3>
             <p>₱${product.price.toFixed(2)}</p>
-            <div class="button-container">
-                <button class="add-to-cart-btn" onclick="addToCart('${product._id}', '${product.name}', ${product.price})">🛒 Add to Cart</button>
-                <button class="view-details-btn" onclick="window.location.href='product-details.html?id=${product._id}'">🔍 View Details</button>
-            </div>
-        </div>`;
+          </div>`;
 
-        if (containers[category]) {
-            containers[category].insertAdjacentHTML("beforeend", productHTML);
-        } else {
-            console.warn(`⚠️ Unrecognized category: "${category}". Adding to 'accessories' by default.`);
-            containers["accessories"].insertAdjacentHTML("beforeend", productHTML);
-        }
+        targetContainer.insertAdjacentHTML("beforeend", productHTML);
     });
+}
+
+
+// Navigate to product details page when clicking on the image
+function goToProductDetails(id, name, price, image) {
+    window.location.href = `product-details.html?id=${id}&name=${encodeURIComponent(name)}&price=${price}&image=${encodeURIComponent(image)}`;
 }
 
 window.addToCart = (id, name, price) => {
@@ -175,4 +181,3 @@ document.getElementById("order-form")?.addEventListener("submit", async function
         }
     }
 });
-
