@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    const API_BASE_URL = "https://backend-px8c.onrender.com"; // ✅ Use Render backend
+    const API_BASE_URL = "https://backend-px8c.onrender.com";
 
     // ✅ Fetch products from the API and display them
     async function fetchProducts() {
@@ -40,19 +40,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `;
 
+            // Edit button
+            const editButton = document.createElement("button");
+            editButton.textContent = "✏️ Edit";
+            editButton.addEventListener("click", () => editProduct(product._id));
+
             // Delete button
             const deleteButton = document.createElement("button");
             deleteButton.textContent = "🗑 Delete";
             deleteButton.addEventListener("click", () => deleteProduct(product._id));
 
+            li.appendChild(editButton);
             li.appendChild(deleteButton);
             productContainer.appendChild(li);
         });
     }
 
+    // ✅ Redirect to Edit Product Page
+    function editProduct(productId) {
+        window.location.href = `edit-product.html?id=${productId}`;
+    }
+
     // ✅ Delete Product (Calls API with DELETE method)
     window.deleteProduct = async (id) => {
-        console.log("🛠️ Deleting Product ID:", id);
+        console.log("🛠 Deleting Product ID:", id);
 
         if (!confirm("Are you sure you want to delete this product?")) return;
 
@@ -91,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const stock = parseInt(stockInput.value.trim(), 10); // ✅ Fixed issue
+        const stock = parseInt(stockInput.value.trim(), 10);
 
         const mainImageFile = document.getElementById("product-image")?.files[0];
         const additionalImages = document.querySelectorAll(".additional-image");
@@ -111,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
         formData.append("price", price);
         formData.append("description", description);
         formData.append("category", category);
-        formData.append("stock", stock); // ✅ Send stock data
+        formData.append("stock", stock);
         formData.append("images", mainImageFile);
 
         // ✅ Append Additional Images (If Available)
@@ -142,20 +153,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // ✅ Ensure Stock is Not Overwritten When Editing a Product
     async function updateProduct(productId) {
         try {
-            // ✅ Fetch Current Product Data First
             const response = await fetch(`${API_BASE_URL}/api/products/${productId}`);
             if (!response.ok) throw new Error("❌ Failed to fetch product data.");
 
             const productData = await response.json();
 
-            // ✅ Get Updated Values from Form
             const name = document.getElementById("product-name").value.trim();
             const price = parseFloat(document.getElementById("product-price").value.trim());
             const description = document.getElementById("product-description").value.trim();
             const category = document.getElementById("product-category").value;
             const stockInput = document.getElementById("product-stock");
 
-            // ✅ Only Update Stock If the Admin Changes It
             let stock = productData.stock;
             if (stockInput) {
                 const newStockValue = parseInt(stockInput.value.trim(), 10);
@@ -166,7 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const updatedProduct = { name, price, description, category, stock };
 
-            // ✅ Send Update Request
             const updateResponse = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -177,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!updateResponse.ok) throw new Error(updateResult.error || "❌ Failed to update product.");
 
             alert("✅ Product updated successfully!");
-            fetchProducts(); // Refresh product list
+            fetchProducts();
         } catch (error) {
             console.error("❌ Error updating product:", error);
             alert("❌ Failed to update product.");
