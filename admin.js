@@ -36,17 +36,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div>
                     <strong>${product.name}</strong> - ₱${product.price} (${product.category})
                     <p>${product.description || 'No description available'}</p>
+                    <p><strong>Stock:</strong> ${product.stock > 0 ? product.stock : "❌ Out of Stock"}</p>
                 </div>
             `;
-
-          
 
             // Delete button
             const deleteButton = document.createElement("button");
             deleteButton.textContent = "🗑 Delete";
             deleteButton.addEventListener("click", () => deleteProduct(product._id));
 
-           
             li.appendChild(deleteButton);
             productContainer.appendChild(li);
         });
@@ -81,15 +79,30 @@ document.addEventListener("DOMContentLoaded", () => {
     productForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const name = document.getElementById("product-name").value.trim();
-        const price = parseFloat(document.getElementById("product-price").value.trim());
-        const description = document.getElementById("product-description").value.trim();
-        const category = document.getElementById("product-category").value;
-        const mainImageFile = document.getElementById("product-image").files[0];
+        const name = document.getElementById("product-name")?.value.trim();
+        const price = parseFloat(document.getElementById("product-price")?.value.trim());
+        const description = document.getElementById("product-description")?.value.trim();
+        const category = document.getElementById("product-category")?.value;
+        const stockInput = document.getElementById("product-stock");
+
+        if (!stockInput) {
+            console.error("❌ Stock input field not found!");
+            alert("❌ Stock input field is missing.");
+            return;
+        }
+
+        const stock = parseInt(stockInput.value.trim(), 10); // ✅ Fixed issue
+
+        const mainImageFile = document.getElementById("product-image")?.files[0];
         const additionalImages = document.querySelectorAll(".additional-image");
 
-        if (!name || isNaN(price) || !category || !mainImageFile) {
+        if (!name || isNaN(price) || !category || !mainImageFile || isNaN(stock)) {
             alert("❌ Please fill in all required fields.");
+            return;
+        }
+
+        if (stock < 0) {
+            alert("❌ Stock cannot be negative.");
             return;
         }
 
@@ -98,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
         formData.append("price", price);
         formData.append("description", description);
         formData.append("category", category);
+        formData.append("stock", stock); // ✅ Send stock data
         formData.append("images", mainImageFile);
 
         // ✅ Append Additional Images (If Available)
@@ -125,5 +139,51 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // ✅ Ensure Stock is Not Overwritten When Editing a Product
+    async function updateProduct(productId) {
+        try {
+            // ✅ Fetch Current Product Data First
+            const response = await fetch(`${API_BASE_URL}/api/products/${productId}`);
+            if (!response.ok) throw new Error("❌ Failed to fetch product data.");
+
+            const productData = await response.json();
+
+            // ✅ Get Updated Values from Form
+            const name = document.getElementById("product-name").value.trim();
+            const price = parseFloat(document.getElementById("product-price").value.trim());
+            const description = document.getElementById("product-description").value.trim();
+            const category = document.getElementById("product-category").value;
+            const stockInput = document.getElementById("product-stock");
+
+            // ✅ Only Update Stock If the Admin Changes It
+            let stock = productData.stock;
+            if (stockInput) {
+                const newStockValue = parseInt(stockInput.value.trim(), 10);
+                if (!isNaN(newStockValue)) {
+                    stock = newStockValue;
+                }
+            }
+
+            const updatedProduct = { name, price, description, category, stock };
+
+            // ✅ Send Update Request
+            const updateResponse = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedProduct)
+            });
+
+            const updateResult = await updateResponse.json();
+            if (!updateResponse.ok) throw new Error(updateResult.error || "❌ Failed to update product.");
+
+            alert("✅ Product updated successfully!");
+            fetchProducts(); // Refresh product list
+        } catch (error) {
+            console.error("❌ Error updating product:", error);
+            alert("❌ Failed to update product.");
+        }
+    }
+
     fetchProducts();
 });
+

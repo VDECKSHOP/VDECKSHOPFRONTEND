@@ -25,39 +25,26 @@ function renderProducts(products) {
         "accessories": document.getElementById("accessories")
     };
 
-    // Ensure all category containers exist
-    if (!containers["playing-cards"] || !containers["poker-chips"] || !containers["accessories"]) {
-        console.error("❌ Product containers not found!");
-        return;
-    }
-
-    // Clear all containers before inserting new products
     Object.values(containers).forEach(container => container.innerHTML = "");
 
     products.forEach((product) => {
-        const category = product.category?.toLowerCase() || "accessories"; // Default to 'accessories'
+        const category = product.category?.toLowerCase() || "accessories";
         const imageUrl = product.images?.[0] || "placeholder.jpg";
 
-        if (!containers[category]) {
-            console.warn(`⚠️ Unknown category: ${category}, placing in 'accessories'.`);
-        }
+        const targetContainer = containers[category] || containers["accessories"];
 
-        const targetContainer = containers[category] || containers["accessories"]; // Fallback to accessories
-
-const productHTML = `
-    <div class="product-card">
-     <img src="${imageUrl}" alt="${product.name}" onerror="this.src='placeholder.jpg'"
-                 onclick="goToProductDetails('${product._id}', '${product.name}', ${product.price}, '${imageUrl}')">
-            <h3>${product.name}</h3>
-            <p>₱${product.price.toFixed(2)}</p>
-          </div>`;
+        const productHTML = `
+            <div class="product-card">
+                <img src="${imageUrl}" alt="${product.name}" onerror="this.onerror=null; this.src='placeholder.jpg';"
+                    onclick="goToProductDetails('${product._id}', '${product.name}', ${product.price}, '${imageUrl}')">
+                <h3>${product.name}</h3>
+                <p>₱${product.price.toFixed(2)}</p>
+            </div>`;
 
         targetContainer.insertAdjacentHTML("beforeend", productHTML);
     });
 }
 
-
-// Navigate to product details page when clicking on the image
 function goToProductDetails(id, name, price, image) {
     window.location.href = `product-details.html?id=${id}&name=${encodeURIComponent(name)}&price=${price}&image=${encodeURIComponent(image)}`;
 }
@@ -90,10 +77,7 @@ function renderCart() {
     const selectedProductTextArea = document.getElementById("selected-product");
     const orderTotalInput = document.getElementById("order-total");
 
-    if (!cartItemsContainer || !cartTotalSpan || !cartCountSpan || !selectedProductTextArea || !orderTotalInput) {
-        console.error("❌ One or more cart elements not found!");
-        return;
-    }
+    if (!cartItemsContainer || !cartTotalSpan || !cartCountSpan || !selectedProductTextArea || !orderTotalInput) return;
 
     cartItemsContainer.innerHTML = "";
     let total = 0;
@@ -116,16 +100,37 @@ function renderCart() {
     orderTotalInput.value = total.toFixed(2);
 }
 
-window.removeFromCart = (index) => {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+async function updateStock(cart) {
+    try {
+        const API_BASE_URL = "https://backend-px8c.onrender.com";
+        for (const item of cart) {
+            const response = await fetch(`${API_BASE_URL}/api/products/${item.id}/update-stock`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ quantity: item.quantity }) // Ensure backend expects `quantity`
+            });
 
-    if (index >= 0 && index < cart.length) {
-        const removedProduct = cart.splice(index, 1)[0];
-        localStorage.setItem("cart", JSON.stringify(cart));
-        renderCart();
-        alert(`${removedProduct.name} removed from cart!`);
+            const responseData = await response.json();
+            console.log("📦 Server Response:", responseData);
+
+            if (!response.ok) {
+                throw new Error(responseData.error || "❌ Failed to update stock.");
+            }
+        }
+        console.log("🔄 Stock updated successfully!");
+    } catch (error) {
+        console.error("❌ Failed to update stock:", error.message);
     }
-};
+}
+function removeFromCart(index) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    if (index >= 0 && index < cart.length) {
+        cart.splice(index, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart(); // ✅ Re-render the cart after removing item
+    }
+}
+
 
 document.getElementById("order-form")?.addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -144,10 +149,10 @@ document.getElementById("order-form")?.addEventListener("submit", async function
     }
 
     const submitButton = document.getElementById("submit-order");
-    if (submitButton) {
-        submitButton.disabled = true;
-        submitButton.textContent = "Processing...";
-    }
+    if (submitButton.disabled) return;
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Processing...";
 
     const formData = new FormData();
     formData.append("fullname", fullname);
@@ -164,20 +169,20 @@ document.getElementById("order-form")?.addEventListener("submit", async function
             body: formData,
         });
 
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || "❌ Failed to place order.");
+        const responseData = await response.json();
+        console.log("📦 Server Response:", responseData);
+
+        if (!response.ok) throw new Error(responseData.error || "❌ Failed to place order.");
 
         alert("✅ Order placed successfully!");
+        await updateStock(cart);
         localStorage.removeItem("cart");
         renderCart();
         document.getElementById("order-form")?.reset();
     } catch (error) {
-        console.error("❌ Order Submission Error:", error);
         alert(error.message);
     } finally {
-        if (submitButton) {
-            submitButton.disabled = false;
-            submitButton.textContent = "Place Order";
-        }
+        submitButton.disabled = false;
+        submitButton.textContent = "Place Order";
     }
 });

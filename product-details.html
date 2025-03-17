@@ -20,16 +20,19 @@
         <div class="product-info">
             <h1 id="product-name"></h1>
             <p class="price"><span id="product-price"></span></p>
+			<!-- Product Stock -->
+            <p class="stock-status"><strong>Stock:</strong> <span id="product-stock"></span></p>
+
             <div class="rating">
                 ⭐⭐⭐⭐⭐ (5.0)
             </div>
             <div class="quantity-controls">
                 <label for="quantity">Quantity:</label>
-                <button onclick="decrementQuantity()">-</button>
+                <button id="decrement-btn">-</button>
                 <input type="number" id="quantity" value="1" min="1">
-                <button onclick="incrementQuantity()">+</button>
+                <button id="increment-btn">+</button>
             </div>
-            <button class="add-to-cart-btn" onclick="addToCartFromDetails()">Add to Cart</button>
+            <button class="add-to-cart-btn" id="add-to-cart-btn">Add to Cart</button>
             <div class="product-description">
                 <h3>Product Description</h3>
                 <p id="product-description"></p>
@@ -39,4 +42,4 @@
 
     <script src="product-details.js"></script>
 </body>
-</html> 
+</html>

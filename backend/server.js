@@ -7,7 +7,6 @@ import path from "path";
 import fs from "fs";
 import productRoutes from "./productRoutes.js";
 import orderRoutes from "./orderRoutes.js";
-import Product from "./product.js"; // Ensure product.js uses ES module syntax
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -20,17 +19,17 @@ async function connectDB() {
     console.log("✅ Connected to MongoDB");
   } catch (err) {
     console.error("❌ MongoDB Connection Error:", err);
-    setTimeout(connectDB, 5000); // Retry in 5 seconds
+    setTimeout(connectDB, 5000);
   }
 }
 connectDB();
 
-// 🔧 Middleware
+// 🛠 Middleware
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// 📂 Multer Storage Setup (For Local File Uploads)
+// 📂 Multer Storage Setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadPath = path.join(process.cwd(), "uploads");
@@ -45,32 +44,52 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// 🖼️ Serve Static Files
+// ⬇️ Serve Static Files
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(express.static(path.join(process.cwd(), "public")));
 
 // 🚀 API Routes
 app.use("/api/products", productRoutes);
-app.use("/api/orders", orderRoutes); // ✅ Ensure this route is working
+app.use("/api/orders", orderRoutes);
 
 // ✅ Default Route
 app.get("/", (req, res) => res.send("🚀 VDECK API is running..."));
 
-// 🔍 Get a Single Product by ID
-app.get("/api/products/:id", async (req, res) => {
+// 🔥 Place Order and Deduct Stock
+app.post("/api/orders", async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: "❌ Product not found" });
+    const { fullname, gcash, address, items, total, paymentProof } = req.body;
+    if (!fullname || !gcash || !address || !items || !total || !paymentProof) {
+      return res.status(400).json({ message: "❌ All fields are required." });
     }
-    res.json(product);
-  } catch (err) {
-    console.error("❌ Error fetching product:", err);
-    res.status(500).json({ error: "Internal Server Error" });
+
+    const orderItems = typeof items === "string" ? JSON.parse(items) : items;
+    console.log("📦 Received Order Items:", orderItems);
+
+    // Validate and Deduct Stock in One Transaction
+    const bulkOps = orderItems.map(item => ({
+      updateOne: {
+        filter: { _id: item.id },
+        update: { $inc: { stock: -item.quantity } }
+      }
+    }));
+
+    const updatedProducts = await Product.bulkWrite(bulkOps);
+    console.log("📉 Stock Updated for Products:", updatedProducts);
+
+    // Save Order
+    const newOrder = new Order({ fullname, gcash, address, items: orderItems, total, paymentProof });
+    const savedOrder = await newOrder.save();
+    console.log("✅ Order Saved:", savedOrder);
+
+    res.status(201).json({ message: "✅ Order placed successfully!", order: savedOrder });
+  } catch (error) {
+    console.error("❌ Order Placement Error:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// 📸 Upload Image Route (For Local Storage)
+// 📸 Upload Image Route
 app.post("/api/upload", upload.single("image"), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded" });
@@ -78,7 +97,7 @@ app.post("/api/upload", upload.single("image"), (req, res) => {
   res.json({ imageUrl: `/uploads/${req.file.filename}` });
 });
 
-// ❌ Handle Undefined Routes (Prevents 404 on `/api/orders`)
+// ❌ Handle Undefined Routes
 app.use((req, res) => {
   res.status(404).json({ error: "❌ Route Not Found" });
 });
@@ -91,4 +110,3 @@ app.use((err, req, res, next) => {
 
 // 🌍 Start Server
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
-
